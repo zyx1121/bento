@@ -1,29 +1,31 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useSupabase } from '@/components/providers/supabase-provider'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useRouter } from 'next/navigation'
+import Link from "next/link";
+import { useSupabase } from "@/components/providers/supabase-provider";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 export default function HeaderBar() {
-  const { user, loading } = useSupabase()
-  const router = useRouter()
-  const supabase = createClient()
+  const { user, loading } = useSupabase();
+  const router = useRouter();
+  const supabase = createClient();
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${
+          process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+        }/api/auth/callback`,
       },
-    })
-  }
+    });
+  };
 
   const handleAvatarClick = () => {
-    router.push('/me')
-  }
+    router.push("/me");
+  };
 
   return (
     <header className="border-b">
@@ -49,14 +51,20 @@ export default function HeaderBar() {
                 className="cursor-pointer transition-opacity hover:opacity-80"
               >
                 <Avatar>
-                  <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email} />
+                  <AvatarImage
+                    src={user.user_metadata?.avatar_url}
+                    alt={user.email}
+                  />
                   <AvatarFallback>
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                    {user.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </button>
             ) : (
-              <Button onClick={handleLogin} className="animate-in fade-in duration-200">
+              <Button
+                onClick={handleLogin}
+                className="animate-in fade-in duration-200"
+              >
                 登入
               </Button>
             )}
@@ -64,6 +72,5 @@ export default function HeaderBar() {
         </div>
       </div>
     </header>
-  )
+  );
 }
-
