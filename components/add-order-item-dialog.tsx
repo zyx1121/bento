@@ -109,15 +109,15 @@ export function AddOrderItemDialog({
           order_count: itemCountMap.get(item.id) || 0,
         }));
 
-        // Sort by order count (descending), then by price (ascending) if count is same or 0
+        // Sort by order count (descending), then by price (ascending - cheap first) for all items
         menuItemsWithCount.sort((a: MenuItem, b: MenuItem) => {
           const countA = a.order_count || 0;
           const countB = b.order_count || 0;
           if (countA !== countB) {
             return countB - countA; // Higher count first
           }
-          // If same count (including both 0), sort by price
-          return a.price - b.price; // Lower price first
+          // If same count (including both 0), sort by price ascending (cheap first)
+          return b.price - a.price; // Higher price first
         });
 
         setMenuItems(menuItemsWithCount);
@@ -237,7 +237,7 @@ export function AddOrderItemDialog({
                   {menuItems.map((item) => {
                     const orderCountText =
                       item.order_count && item.order_count > 0
-                        ? `（已點過 ${item.order_count} 次）`
+                        ? `（${item.order_count} 個訂餐）`
                         : "";
                     return (
                       <SelectItem key={item.id} value={item.id}>
