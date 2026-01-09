@@ -70,6 +70,15 @@ export function OrderDetail({ orderId }: { orderId: string }) {
     }
   }, [user]);
 
+  // When user logs in after page load, refetch order so user names are populated
+  useEffect(() => {
+    if (!user) return;
+    // Invalidate anon cached order and fetch again with authenticated context
+    invalidateCache();
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   // Listen for order update events to refresh the order detail
   useEffect(() => {
     const handleOrderUpdate = () => {
@@ -169,6 +178,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
           items={order.order_items}
           isActive={isActive}
           currentUserId={user?.id}
+          currentUserName={user?.user_metadata?.name || user?.email || null}
           orderId={orderId}
           updateOrder={updateData}
           onDelete={async () => {
