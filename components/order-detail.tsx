@@ -71,6 +71,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
   }, [user]);
 
   // When user logs in after page load, refetch order so user names are populated
+  // Note: With new cache mechanism, this will automatically fetch on mount anyway
   useEffect(() => {
     if (!user) return;
     // Invalidate anon cached order and fetch again with authenticated context

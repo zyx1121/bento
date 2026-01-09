@@ -42,7 +42,6 @@ export default function RankPage() {
       }
       return res.json();
     },
-    maxAge: 60 * 1000, // 1 minute cache
   });
 
   return (

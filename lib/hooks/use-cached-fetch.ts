@@ -1,24 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { getCache, setCache, clearCache, isDataChanged, isCacheStale } from '@/lib/utils/cache'
+import { getCache, setCache, clearCache, isDataChanged } from '@/lib/utils/cache'
 
 interface UseCachedFetchOptions {
   cacheKey: string
   fetchFn: () => Promise<any>
   skipCache?: boolean
   onDataChange?: (data: any) => void
-  maxAge?: number // Maximum age in milliseconds before cache is considered stale, default 1 minute
 }
 
 /**
  * Unified hook for cached data fetching with stale-while-revalidate pattern
  * Always shows cache immediately (if available) and fetches fresh data in background
+ * localStorage has no expiration - only API layer (Next.js revalidate) controls freshness
  */
 export function useCachedFetch<T>({
   cacheKey,
   fetchFn,
   skipCache = false,
   onDataChange,
-  maxAge = 60 * 1000, // Default 1 minute
 }: UseCachedFetchOptions) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
@@ -66,14 +65,13 @@ export function useCachedFetch<T>({
     async (forceRefresh = false) => {
       // Always show cache first if available
       const cached = getCache<T>(cacheKey)
-      const isStale = isCacheStale(cacheKey, maxAge)
 
       if (cached && !skipCache && !forceRefresh) {
         setData(cached)
         setLoading(false)
 
-        // Only fetch fresh data in background if cache is stale
-        if (isStale && !fetchingRef.current) {
+        // Always fetch fresh data in background (no maxAge check)
+        if (!fetchingRef.current) {
           fetchFreshData(cacheKey)
         }
         return
@@ -82,7 +80,7 @@ export function useCachedFetch<T>({
       // No cache or skipCache/forceRefresh=true, fetch fresh data
       await fetchFreshData(cacheKey)
     },
-    [cacheKey, skipCache, maxAge, fetchFreshData]
+    [cacheKey, skipCache, fetchFreshData]
   )
 
   const invalidateCache = useCallback(() => {
@@ -91,13 +89,11 @@ export function useCachedFetch<T>({
 
   const prevCacheKeyRef = useRef<string | null>(null)
   const skipCacheRef = useRef(skipCache)
-  const maxAgeRef = useRef(maxAge)
 
   // Keep refs updated
   useEffect(() => {
     skipCacheRef.current = skipCache
-    maxAgeRef.current = maxAge
-  }, [skipCache, maxAge])
+  }, [skipCache])
 
   useEffect(() => {
     // Only fetch on mount or when cacheKey changes
@@ -107,14 +103,13 @@ export function useCachedFetch<T>({
 
       // Always show cache first if available
       const cached = getCache<T>(cacheKey)
-      const isStale = isCacheStale(cacheKey, maxAgeRef.current)
 
       if (cached && !skipCacheRef.current) {
         setData(cached)
         setLoading(false)
 
-        // Only fetch fresh data in background if cache is stale
-        if (isStale && !fetchingRef.current) {
+        // Always fetch fresh data in background (no maxAge check)
+        if (!fetchingRef.current) {
           fetchFreshData(cacheKey)
         }
       } else {
