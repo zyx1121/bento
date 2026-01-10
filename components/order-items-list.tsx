@@ -128,16 +128,9 @@ export function OrderItemsList({
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.id} className="h-11">
+            <TableCell>{item.user?.name}</TableCell>
             <TableCell>
-              {item.user?.name ||
-                (currentUserId &&
-                currentUserName &&
-                item.user_id === currentUserId
-                  ? currentUserName
-                  : "未知")}
-            </TableCell>
-            <TableCell>
-              {item.menu_items?.name || "未知"}
+              {item.menu_items?.name}
               {item.no_sauce && (
                 <Badge
                   variant="secondary"
@@ -158,7 +151,7 @@ export function OrderItemsList({
               )}
             </TableCell>
             <TableCell className="text-right">
-              NT$ {(item.menu_items?.price || 0).toLocaleString()}
+              NT$ {(item.menu_items?.price).toLocaleString()}
             </TableCell>
           </TableRow>
         ))}
