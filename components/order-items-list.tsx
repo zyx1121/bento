@@ -128,7 +128,7 @@ export function OrderItemsList({
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.id} className="h-11">
-            <TableCell>{item.user?.name}</TableCell>
+            <TableCell>{item.user?.name ? item.user.name : "未知"}</TableCell>
             <TableCell>
               {item.menu_items?.name}
               {item.no_sauce && (
