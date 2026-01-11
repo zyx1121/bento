@@ -6,16 +6,42 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
+  const error = requestUrl.searchParams.get("error");
+  const errorDescription = requestUrl.searchParams.get("error_description");
+
+  // If there's an error from OAuth provider, log it and redirect
+  if (error) {
+    console.error("OAuth error:", error, errorDescription);
+    return NextResponse.redirect(
+      `${origin}/me?error=auth_failed&reason=${error}`
+    );
+  }
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error: exchangeError } =
+      await supabase.auth.exchangeCodeForSession(code);
 
-    if (error) {
-      console.error("Error exchanging code for session:", error);
+    if (exchangeError) {
+      console.error("Error exchanging code for session:", exchangeError);
+      console.error("Code:", code);
+      console.error("Origin:", origin);
       // Redirect to error page or back to me page
-      return NextResponse.redirect(`${origin}/me?error=auth_failed`);
+      return NextResponse.redirect(
+        `${origin}/me?error=auth_failed&reason=${exchangeError.message}`
+      );
     }
+
+    // Successfully exchanged code for session
+    if (data.session) {
+      console.log("Successfully authenticated user:", data.session.user.id);
+    }
+  } else {
+    // No code parameter, might be a direct visit to callback
+    console.warn("No code parameter in callback URL");
+    return NextResponse.redirect(
+      `${origin}/me?error=auth_failed&reason=no_code`
+    );
   }
 
   // If linking identity, redirect back to /me page

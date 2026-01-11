@@ -75,12 +75,13 @@ export default function HeaderBar() {
   };
 
   const handleLogin = async (provider: "google" | "keycloak") => {
+    // Use current origin instead of environment variable to ensure consistency
+    const redirectTo = `${window.location.origin}/api/auth/callback`;
+
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${
-          process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-        }/api/auth/callback`,
+        redirectTo,
         scopes: provider === "keycloak" ? "openid" : undefined,
       },
     });
