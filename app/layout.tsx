@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import HeaderBar from "@/components/header-bar";
+import { Separator } from "@/components/ui/separator";
 import { AuthProvider } from "@/contexts/auth-context";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
@@ -34,6 +35,7 @@ export default function RootLayout({
           <AuthProvider>
             <div className="flex flex-col min-h-dvh">
               <HeaderBar />
+              <Separator />
               <main className="flex-1">{children}</main>
             </div>
           </AuthProvider>

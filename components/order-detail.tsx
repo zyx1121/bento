@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { OrderDetailHeader } from "./order-detail-header";
 import { OrderItemsList } from "./order-items-list";
-import { OrderDetailSkeleton } from "./skeletons/order-detail-skeleton";
 
 interface OrderItem {
   id: string;
@@ -160,10 +159,6 @@ export function OrderDetail({ orderId }: { orderId: string }) {
     }
   };
 
-  if (loading) {
-    return <OrderDetailSkeleton />;
-  }
-
   if (!order) {
     return <div className="container mx-auto px-4 py-8">訂單不存在</div>;
   }
@@ -171,7 +166,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
   const isActive = order.status === "active";
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="flex flex-col gap-4 p-4 max-w-5xl mx-auto">
       <OrderDetailHeader order={order} />
       <div className="mt-6">
         <h2 className="text-2xl font-semibold mb-4">訂單項目</h2>

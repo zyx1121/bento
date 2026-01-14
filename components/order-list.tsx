@@ -5,7 +5,6 @@ import { useCachedFetch } from "@/lib/hooks/use-cached-fetch";
 import { isAdmin } from "@/lib/utils/admin-client";
 import { useEffect, useState } from "react";
 import { OrderCard } from "./order-card";
-import { OrderListSkeleton } from "./skeletons/order-list-skeleton";
 
 interface Order {
   id: string;
@@ -94,15 +93,11 @@ export function OrderList() {
   const activeOrders = (orders || []).filter((o) => o.status === "active");
   const closedOrders = (orders || []).filter((o) => o.status === "closed");
 
-  if (loading) {
-    return <OrderListSkeleton />;
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="flex flex-col gap-4 p-4 max-w-5xl mx-auto">
       {activeOrders.length > 0 && (
         <div className="mb-8">
-          <h1 className="text-xl font-bold mb-6">進行中</h1>
+          <h1 className="text-xl font-bold mb-6 mx-2">進行中</h1>
           <div className="space-y-4">
             {activeOrders.map((order) => (
               <OrderCard key={order.id} order={order} />
@@ -113,7 +108,7 @@ export function OrderList() {
 
       {closedOrders.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-6">已結束</h2>
+          <h2 className="text-xl font-semibold mb-6 mx-2">已結束</h2>
           <div className="space-y-4">
             {closedOrders.map((order) => (
               <OrderCard key={order.id} order={order} />

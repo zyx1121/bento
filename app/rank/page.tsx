@@ -45,8 +45,8 @@ export default function RankPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">排名</h1>
+    <div className="flex flex-col gap-4 p-4 max-w-5xl mx-auto">
+      <h1 className="text-xl font-bold mb-6 mx-2">排名</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <TopSpenders data={data?.topSpenders || []} loading={loading} />
         <TopVariety data={data?.topVariety || []} loading={loading} />

@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuth } from "@/contexts/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { isAdmin } from "@/lib/utils/admin-client";
 import Link from "next/link";
@@ -144,172 +144,168 @@ export default function HeaderBar() {
   };
 
   return (
-    <header className="border-b">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Left side - Navigation links */}
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="font-semibold text-lg">
-              訂單
-            </Link>
-            <Link href="/menus" className="font-semibold text-lg">
-              店家
-            </Link>
-            <Link href="/rank" className="font-semibold text-lg">
-              排名
-            </Link>
-          </nav>
+    <header className="flex items-center justify-between p-4 px-6 w-full max-w-5xl mx-auto">
+      {/* Left side - Navigation links */}
+      <nav className="flex items-center gap-6">
+        <Link href="/" className="font-semibold text-lg">
+          訂單
+        </Link>
+        <Link href="/menus" className="font-semibold text-lg">
+          店家
+        </Link>
+        <Link href="/rank" className="font-semibold text-lg">
+          排名
+        </Link>
+      </nav>
 
-          {/* Right side - User area */}
-          <div className="flex items-center gap-3">
-            {/* Admin actions */}
-            {!adminLoading && isAdminUser && user && (
-              <>
-                {/* Create order button (on order list page) */}
-                {pathname === "/" && (
-                  <CreateOrderDialog
-                    trigger={
-                      <Button
-                        size="sm"
-                        className="animate-in fade-in slide-in-from-right-2 duration-200"
-                      >
-                        新增訂單
-                      </Button>
-                    }
-                    onSuccess={async () => {
-                      // Clear cache and notify order list to refresh
-                      const { clearCache } = await import("@/lib/utils/cache");
-                      clearCache("orders");
-                      window.dispatchEvent(new CustomEvent("order-updated"));
-                      router.refresh();
-                    }}
-                  />
-                )}
-
-                {/* Create restaurant button (on restaurant list page) */}
-                {pathname === "/menus" && (
-                  <CreateRestaurantDialog
-                    trigger={
-                      <Button
-                        size="sm"
-                        className="animate-in fade-in slide-in-from-right-2 duration-200"
-                      >
-                        新增店家
-                      </Button>
-                    }
-                    onSuccess={() => {
-                      router.refresh();
-                    }}
-                  />
-                )}
-
-                {/* Order actions (on order detail page) */}
-                {orderId && orderStatus === "active" && (
-                  <>
-                    <Button
-                      onClick={handleDeleteOrder}
-                      variant="destructive"
-                      size="sm"
-                      className="animate-in fade-in slide-in-from-right-2 duration-200"
-                    >
-                      刪除訂單
-                    </Button>
-                    <Button
-                      onClick={handleCloseOrder}
-                      variant="default"
-                      size="sm"
-                      className="animate-in fade-in slide-in-from-right-2 duration-200"
-                    >
-                      關閉訂單
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-
-            {/* Add order item button (on order detail page, for all logged-in users) */}
-            {orderId && orderStatus === "active" && user && (
-              <AddOrderItemDialog
-                orderId={orderId}
+      {/* Right side - User area */}
+      <div className="flex items-center gap-3">
+        {/* Admin actions */}
+        {!adminLoading && isAdminUser && user && (
+          <>
+            {/* Create order button (on order list page) */}
+            {pathname === "/" && (
+              <CreateOrderDialog
                 trigger={
                   <Button
                     size="sm"
                     className="animate-in fade-in slide-in-from-right-2 duration-200"
                   >
-                    新增訂餐
+                    新增訂單
                   </Button>
                 }
                 onSuccess={async () => {
-                  // Clear cache
+                  // Clear cache and notify order list to refresh
                   const { clearCache } = await import("@/lib/utils/cache");
                   clearCache("orders");
-                  clearCache(`order_${orderId}`);
-
-                  // Dispatch custom event to trigger order list and detail refresh
-                  window.dispatchEvent(
-                    new CustomEvent("order-updated", {
-                      detail: { orderId },
-                    })
-                  );
-
+                  window.dispatchEvent(new CustomEvent("order-updated"));
                   router.refresh();
                 }}
               />
             )}
 
-            {/* User avatar */}
-            {loading ? (
-              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
-            ) : user ? (
-              <button
-                onClick={handleAvatarClick}
-                className="cursor-pointer transition-opacity hover:opacity-80"
-              >
-                <Avatar>
-                  <AvatarImage
-                    src={user.user_metadata?.avatar_url}
-                    alt={user.email}
-                  />
-                  <AvatarFallback>
-                    {user.email?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            ) : (
+            {/* Create restaurant button (on restaurant list page) */}
+            {pathname === "/menus" && (
+              <CreateRestaurantDialog
+                trigger={
+                  <Button
+                    size="sm"
+                    className="animate-in fade-in slide-in-from-right-2 duration-200"
+                  >
+                    新增店家
+                  </Button>
+                }
+                onSuccess={() => {
+                  router.refresh();
+                }}
+              />
+            )}
+
+            {/* Order actions (on order detail page) */}
+            {orderId && orderStatus === "active" && (
+              <>
+                <Button
+                  onClick={handleDeleteOrder}
+                  variant="destructive"
+                  size="sm"
+                  className="animate-in fade-in slide-in-from-right-2 duration-200"
+                >
+                  刪除訂單
+                </Button>
+                <Button
+                  onClick={handleCloseOrder}
+                  variant="default"
+                  size="sm"
+                  className="animate-in fade-in slide-in-from-right-2 duration-200"
+                >
+                  關閉訂單
+                </Button>
+              </>
+            )}
+          </>
+        )}
+
+        {/* Add order item button (on order detail page, for all logged-in users) */}
+        {orderId && orderStatus === "active" && user && (
+          <AddOrderItemDialog
+            orderId={orderId}
+            trigger={
               <Button
                 size="sm"
-                onClick={() => handleLogin("keycloak")}
-                className="animate-in fade-in duration-200"
+                className="animate-in fade-in slide-in-from-right-2 duration-200"
               >
-                登入
+                新增訂餐
               </Button>
-              // <Dialog>
-              //   <DialogTrigger asChild>
-              //     <Button size="sm" className="animate-in fade-in duration-200">
-              //       登入
-              //     </Button>
-              //   </DialogTrigger>
-              //   <DialogContent className="sm:max-w-[360px]">
-              //     <DialogHeader>
-              //       <DialogTitle>選擇登入方式</DialogTitle>
-              //       <DialogDescription>
-              //         使用 Keycloak 進行登入。
-              //       </DialogDescription>
-              //     </DialogHeader>
-              //     <div className="grid gap-3">
-              //       <Button
-              //         variant="outline"
-              //         onClick={() => handleLogin("keycloak")}
-              //         className="justify-center"
-              //       >
-              //         使用 Keycloak 登入
-              //       </Button>
-              //     </div>
-              //   </DialogContent>
-              // </Dialog>
-            )}
-          </div>
-        </div>
+            }
+            onSuccess={async () => {
+              // Clear cache
+              const { clearCache } = await import("@/lib/utils/cache");
+              clearCache("orders");
+              clearCache(`order_${orderId}`);
+
+              // Dispatch custom event to trigger order list and detail refresh
+              window.dispatchEvent(
+                new CustomEvent("order-updated", {
+                  detail: { orderId },
+                })
+              );
+
+              router.refresh();
+            }}
+          />
+        )}
+
+        {/* User avatar */}
+        {loading ? (
+          <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+        ) : user ? (
+          <button
+            onClick={handleAvatarClick}
+            className="cursor-pointer transition-opacity hover:opacity-80"
+          >
+            <Avatar>
+              <AvatarImage
+                src={user.user_metadata?.avatar_url}
+                alt={user.email}
+              />
+              <AvatarFallback>
+                {user.email?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        ) : (
+          <Button
+            size="sm"
+            onClick={() => handleLogin("keycloak")}
+            className="animate-in fade-in duration-200"
+          >
+            登入
+          </Button>
+          // <Dialog>
+          //   <DialogTrigger asChild>
+          //     <Button size="sm" className="animate-in fade-in duration-200">
+          //       登入
+          //     </Button>
+          //   </DialogTrigger>
+          //   <DialogContent className="sm:max-w-[360px]">
+          //     <DialogHeader>
+          //       <DialogTitle>選擇登入方式</DialogTitle>
+          //       <DialogDescription>
+          //         使用 Keycloak 進行登入。
+          //       </DialogDescription>
+          //     </DialogHeader>
+          //     <div className="grid gap-3">
+          //       <Button
+          //         variant="outline"
+          //         onClick={() => handleLogin("keycloak")}
+          //         className="justify-center"
+          //       >
+          //         使用 Keycloak 登入
+          //       </Button>
+          //     </div>
+          //   </DialogContent>
+          // </Dialog>
+        )}
       </div>
     </header>
   );
