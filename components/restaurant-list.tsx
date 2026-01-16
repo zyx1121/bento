@@ -67,7 +67,7 @@ export function RestaurantList() {
     <div className="flex flex-col gap-4 p-4 max-w-5xl mx-auto">
       <h1 className="text-xl font-bold mb-6 mx-2">店家列表</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {(restaurants || []).map((restaurant) => (
           <RestaurantCard
             key={restaurant.id}

@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import { Footer } from "@/components/footer";
 import HeaderBar from "@/components/header-bar";
 import { Separator } from "@/components/ui/separator";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -37,6 +38,7 @@ export default function RootLayout({
               <HeaderBar />
               <Separator />
               <main className="flex-1">{children}</main>
+              <Footer />
             </div>
           </AuthProvider>
         </ThemeProvider>
