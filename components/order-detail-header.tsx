@@ -45,7 +45,7 @@ export function OrderDetailHeader({ order }: { order: Order }) {
   const orderItems = order.order_items || [];
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 mx-2">
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2">
