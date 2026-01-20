@@ -34,6 +34,7 @@ interface OrderItem {
   id: string;
   menu_item_id: string;
   no_sauce: boolean;
+  additional: number | null;
   user_id: string;
   menu_items: {
     name: string;
@@ -55,6 +56,7 @@ interface Order {
     id: string;
     name: string;
     phone: string;
+    additional: string[] | null;
   };
   order_items: OrderItem[];
 }
@@ -74,6 +76,8 @@ export function AddOrderItemDialog({
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedItem, setSelectedItem] = useState("");
   const [noSauce, setNoSauce] = useState(false);
+  const [selectedAdditional, setSelectedAdditional] = useState<number | null>(null);
+  const [restaurantAdditionalOptions, setRestaurantAdditionalOptions] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const { user } = useAuth();
@@ -89,6 +93,17 @@ export function AddOrderItemDialog({
       const res = await fetch(`/api/orders/${orderId}`);
       const data = await res.json();
       setRestaurantId(data.restaurant_id);
+
+      // Set restaurant additional options
+      const additionalOptions = data.restaurants?.additional || null;
+      setRestaurantAdditionalOptions(additionalOptions);
+
+      // Auto-select first additional option if available
+      if (additionalOptions && additionalOptions.length > 0) {
+        setSelectedAdditional(0);
+      } else {
+        setSelectedAdditional(null);
+      }
 
       if (data.restaurants?.id) {
         const menuRes = await fetch(`/api/menus/${data.restaurants.id}`);
@@ -150,6 +165,7 @@ export function AddOrderItemDialog({
         id: `temp_${Date.now()}`,
         menu_item_id: selectedItem,
         no_sauce: noSauce,
+        additional: selectedAdditional,
         user_id: user.id,
         menu_items: {
           name: selectedMenuItem.name,
@@ -185,6 +201,7 @@ export function AddOrderItemDialog({
             order_id: orderId,
             menu_item_id: selectedItem,
             no_sauce: noSauce,
+            additional: selectedAdditional,
           }),
         });
 
@@ -205,6 +222,7 @@ export function AddOrderItemDialog({
         setOpen(false);
         setSelectedItem("");
         setNoSauce(false);
+        setSelectedAdditional(null);
         onSuccess();
       } catch (error) {
         // Rollback on error (if updateOrder is provided)
@@ -291,19 +309,42 @@ export function AddOrderItemDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="noSauce"
-                checked={noSauce}
-                onCheckedChange={(checked) => setNoSauce(checked === true)}
-              />
-              <Label
-                htmlFor="noSauce"
-                className="cursor-pointer whitespace-nowrap text-base"
-              >
-                不醬
-              </Label>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="noSauce"
+                  checked={noSauce}
+                  onCheckedChange={(checked) => setNoSauce(checked === true)}
+                />
+                <Label
+                  htmlFor="noSauce"
+                  className="cursor-pointer whitespace-nowrap text-base"
+                >
+                  不醬
+                </Label>
+              </div>
             </div>
+            {restaurantAdditionalOptions && restaurantAdditionalOptions.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <Select
+                  value={selectedAdditional !== null ? selectedAdditional.toString() : undefined}
+                  onValueChange={(value) => {
+                    setSelectedAdditional(parseInt(value));
+                  }}
+                >
+                  <SelectTrigger className="w-32 text-base h-12">
+                    <SelectValue placeholder="額外選項" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {restaurantAdditionalOptions.map((option, index) => (
+                      <SelectItem key={index} value={index.toString()}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button

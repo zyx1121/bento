@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       menu_item_id: body.menu_item_id,
       user_id: user.id,
       no_sauce: body.no_sauce || false,
+      additional: body.additional !== undefined ? body.additional : null,
     })
     .select()
     .single()

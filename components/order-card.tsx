@@ -8,6 +8,7 @@ import { Card } from "./ui/card";
 interface OrderItem {
   menu_item_id: string;
   no_sauce?: boolean;
+  additional?: number | null;
   menu_items: {
     name: string;
     price: number;
@@ -23,6 +24,7 @@ interface Order {
   closed_at: string | null;
   restaurants: {
     name: string;
+    additional?: string[] | null;
   };
   order_items?: OrderItem[];
 }
@@ -58,7 +60,10 @@ export function OrderCard({ order }: { order: Order }) {
                 {orderDate}
               </Badge>
             </div>
-            <OrderStats orderItems={orderItems} />
+            <OrderStats
+              orderItems={orderItems}
+              restaurantAdditional={order.restaurants?.additional || null}
+            />
           </div>
         </div>
       </Card>

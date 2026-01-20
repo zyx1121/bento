@@ -6,6 +6,7 @@ import { Badge } from "./ui/badge";
 interface OrderItemForStats {
   menu_item_id: string;
   no_sauce?: boolean;
+  additional?: number | null;
   menu_items: {
     name: string;
     price: number;
@@ -15,20 +16,32 @@ interface OrderItemForStats {
 
 interface OrderStatsProps {
   orderItems: OrderItemForStats[];
+  restaurantAdditional?: string[] | null;
   className?: string;
 }
 
-export function OrderStats({ orderItems, className }: OrderStatsProps) {
+export function OrderStats({ orderItems, restaurantAdditional, className }: OrderStatsProps) {
   const items = orderItems || [];
 
   // Calculate statistics
   const uniqueUsers = new Set(items.map((item) => item.user_id));
   const userCount = uniqueUsers.size;
 
-  // Count menu items and their quantities
+  // Count menu items by option combinations (no_sauce + additional)
+  // Key: menu_item_id, Value: Map of option combination to count
+  type OptionCombination = {
+    noSauce: boolean;
+    additional: number | null;
+  };
+
   const menuItemCounts = new Map<
     string,
-    { name: string; count: number; price: number; noSauceCount: number }
+    {
+      name: string;
+      price: number;
+      totalCount: number;
+      combinations: Map<string, number>; // Map of combination key to count
+    }
   >();
 
   items.forEach((item) => {
@@ -36,18 +49,26 @@ export function OrderStats({ orderItems, className }: OrderStatsProps) {
     const menuItemName = item.menu_items?.name || "未知品項";
     const menuItemPrice = item.menu_items?.price || 0;
 
+    // Create combination key: "noSauce:true,additional:0" or "noSauce:false,additional:null"
+    const combination: OptionCombination = {
+      noSauce: item.no_sauce || false,
+      additional: item.additional !== null && item.additional !== undefined ? item.additional : null,
+    };
+    const combinationKey = `noSauce:${combination.noSauce},additional:${combination.additional}`;
+
     if (menuItemCounts.has(menuItemId)) {
       const existing = menuItemCounts.get(menuItemId)!;
-      existing.count += 1;
-      if (item.no_sauce) {
-        existing.noSauceCount += 1;
-      }
+      existing.totalCount += 1;
+      const currentCount = existing.combinations.get(combinationKey) || 0;
+      existing.combinations.set(combinationKey, currentCount + 1);
     } else {
+      const combinations = new Map<string, number>();
+      combinations.set(combinationKey, 1);
       menuItemCounts.set(menuItemId, {
         name: menuItemName,
-        count: 1,
         price: menuItemPrice,
-        noSauceCount: item.no_sauce ? 1 : 0,
+        totalCount: 1,
+        combinations,
       });
     }
   });
@@ -57,9 +78,9 @@ export function OrderStats({ orderItems, className }: OrderStatsProps) {
     return sum + (item.menu_items?.price || 0);
   }, 0);
 
-  // Format menu items list for Badge display, sorted by count desc
+  // Format menu items list for Badge display, sorted by total count desc
   const menuItemsList = Array.from(menuItemCounts.values()).sort(
-    (a, b) => b.count - a.count
+    (a, b) => b.totalCount - a.totalCount
   );
 
   return (
@@ -87,12 +108,36 @@ export function OrderStats({ orderItems, className }: OrderStatsProps) {
               className="text-sm px-3 py-1"
             >
               {item.name}{" "}
-              <span className="font-semibold">{item.count}</span> 份
-              {item.noSauceCount > 0 && (
-                <span className="text-xs text-muted-foreground ml-1">
-                  （不醬 {item.noSauceCount} 份）
-                </span>
-              )}
+              <span className="font-semibold">{item.totalCount}</span> 份
+              {Array.from(item.combinations.entries())
+                .sort((a, b) => b[1] - a[1]) // Sort by count descending
+                .map(([combinationKey, count]) => {
+                  // Parse combination key
+                  const parts = combinationKey.split(",");
+                  const noSauce = parts[0].split(":")[1] === "true";
+                  const additionalStr = parts[1].split(":")[1];
+                  const additional = additionalStr === "null" ? null : parseInt(additionalStr);
+
+                  // Build option text
+                  const options: string[] = [];
+                  if (noSauce) {
+                    options.push("不醬");
+                  }
+                  if (additional !== null && restaurantAdditional && restaurantAdditional[additional]) {
+                    options.push(restaurantAdditional[additional]);
+                  }
+
+                  // Only show parentheses if there are options
+                  if (options.length > 0) {
+                    return (
+                      <span key={combinationKey} className="text-xs text-muted-foreground ml-1">
+                        （{options.join(" ")} {count} 份）
+                      </span>
+                    );
+                  }
+                  return null;
+                })
+                .filter((item): item is React.ReactElement => item !== null)}
             </Badge>
           ))}
         </div>

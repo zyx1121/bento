@@ -12,6 +12,7 @@ interface OrderItem {
   id: string;
   menu_item_id: string;
   no_sauce: boolean;
+  additional: number | null;
   user_id: string;
   menu_items: {
     name: string;
@@ -33,6 +34,7 @@ interface Order {
     id: string;
     name: string;
     phone: string;
+    additional: string[] | null;
   };
   order_items: OrderItem[];
 }
@@ -177,6 +179,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
           currentUserName={user?.user_metadata?.name || user?.email || null}
           orderId={orderId}
           updateOrder={updateData}
+          restaurantAdditional={order.restaurants?.additional || null}
           onDelete={async () => {
             // Also clear orders list cache
             const { clearCache } = await import("@/lib/utils/cache");

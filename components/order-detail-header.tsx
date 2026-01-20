@@ -6,6 +6,7 @@ import { Badge } from "./ui/badge";
 interface OrderItem {
   menu_item_id: string;
   no_sauce?: boolean;
+  additional?: number | null;
   menu_items: {
     name: string;
     price: number;
@@ -23,6 +24,7 @@ interface Order {
     id: string;
     name: string;
     phone: string;
+    additional?: string[] | null;
   };
   order_items?: OrderItem[];
 }
@@ -65,7 +67,10 @@ export function OrderDetailHeader({ order }: { order: Order }) {
           </p>
         </div>
       </div>
-      <OrderStats orderItems={orderItems} />
+      <OrderStats
+        orderItems={orderItems}
+        restaurantAdditional={order.restaurants?.additional || null}
+      />
     </div>
   );
 }

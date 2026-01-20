@@ -45,6 +45,7 @@ export async function PUT(
       .update({
         name: body.name,
         phone: body.phone,
+        additional: body.additional !== undefined ? body.additional : null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)

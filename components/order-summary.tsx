@@ -6,6 +6,7 @@ interface OrderItem {
   id: string
   menu_item_id: string
   no_sauce: boolean
+  additional?: number | null
   menu_items: {
     name: string
     price: number

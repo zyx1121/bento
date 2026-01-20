@@ -15,6 +15,7 @@ interface OrderItem {
   id: string;
   menu_item_id: string;
   no_sauce: boolean;
+  additional: number | null;
   user_id: string;
   menu_items: {
     name: string;
@@ -36,6 +37,7 @@ interface Order {
     id: string;
     name: string;
     phone: string;
+    additional: string[] | null;
   };
   order_items: OrderItem[];
 }
@@ -55,6 +57,7 @@ export function OrderItemsList({
   onDelete,
   orderId,
   updateOrder,
+  restaurantAdditional,
 }: {
   items: OrderItem[];
   isActive: boolean;
@@ -63,6 +66,7 @@ export function OrderItemsList({
   onDelete: () => void;
   orderId?: string;
   updateOrder?: (order: Order) => void;
+  restaurantAdditional?: string[] | null;
 }) {
   const handleDelete = async (id: string) => {
     if (!confirm("確定要刪除此訂餐項目嗎？") || !orderId) return;
@@ -133,7 +137,16 @@ export function OrderItemsList({
     return acc;
   }, {} as Record<string, GroupedOrderItem>);
 
-  const groupedItemsArray = Object.values(groupedItems);
+  // Sort: current user first, then others by total descending
+  const groupedItemsArray = Object.values(groupedItems).sort((a, b) => {
+    // If current user exists, put them first
+    if (currentUserId) {
+      if (a.user_id === currentUserId) return -1;
+      if (b.user_id === currentUserId) return 1;
+    }
+    // Sort others by total descending
+    return b.total - a.total;
+  });
 
   if (items.length === 0) {
     return (
@@ -165,6 +178,17 @@ export function OrderItemsList({
                         不醬
                       </Badge>
                     )}
+                    {item.additional !== null &&
+                      item.additional !== undefined &&
+                      restaurantAdditional &&
+                      restaurantAdditional[item.additional] && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[11px] px-2 py-0.5"
+                        >
+                          {restaurantAdditional[item.additional]}
+                        </Badge>
+                      )}
                     {isActive && currentUserId === item.user_id && (
                       <Button
                         variant="destructive"
@@ -182,7 +206,10 @@ export function OrderItemsList({
             <ItemActions>
               <div className="text-right font-medium">
                 <div className="text-lg text-muted-foreground">總計</div>
-                <div className="text-lg">
+                <div
+                  className={`text-lg ${group.total > 140 ? "text-destructive" : ""
+                    }`}
+                >
                   NT$ {group.total.toLocaleString()}
                 </div>
               </div>

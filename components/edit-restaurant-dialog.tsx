@@ -36,6 +36,7 @@ interface Restaurant {
   id: string;
   name: string;
   phone: string;
+  additional?: string[] | null;
 }
 
 export function EditRestaurantDialog({
@@ -50,6 +51,10 @@ export function EditRestaurantDialog({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(restaurant.name);
   const [phone, setPhone] = useState(restaurant.phone);
+  const [additionalOptions, setAdditionalOptions] = useState<string[]>(
+    restaurant.additional || []
+  );
+  const [newAdditionalOption, setNewAdditionalOption] = useState("");
   const [menuItems, setMenuItems] = useState<MenuParserItem[]>(
     existingMenuItems
       .map((item) => ({
@@ -91,6 +96,7 @@ export function EditRestaurantDialog({
             price: item.price,
             type: item.type || null,
           })),
+          additional: additionalOptions.length > 0 ? additionalOptions : null,
         }),
       });
 
@@ -171,6 +177,74 @@ export function EditRestaurantDialog({
             <div className="space-y-2">
               <Label>菜單項目（可編輯）</Label>
               <MenuParser items={menuItems} onChange={setMenuItems} />
+            </div>
+            <div className="space-y-2">
+              <Label>自訂選項（如：辣度、醬汁等）</Label>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="例如：不辣、小辣、中辣、大辣"
+                    value={newAdditionalOption}
+                    onChange={(e) => setNewAdditionalOption(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (
+                          newAdditionalOption.trim() &&
+                          !additionalOptions.includes(newAdditionalOption.trim())
+                        ) {
+                          setAdditionalOptions([
+                            ...additionalOptions,
+                            newAdditionalOption.trim(),
+                          ]);
+                          setNewAdditionalOption("");
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (
+                        newAdditionalOption.trim() &&
+                        !additionalOptions.includes(newAdditionalOption.trim())
+                      ) {
+                        setAdditionalOptions([
+                          ...additionalOptions,
+                          newAdditionalOption.trim(),
+                        ]);
+                        setNewAdditionalOption("");
+                      }
+                    }}
+                  >
+                    新增
+                  </Button>
+                </div>
+                {additionalOptions.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {additionalOptions.map((option, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md text-sm"
+                      >
+                        <span>{option}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdditionalOptions(
+                              additionalOptions.filter((_, i) => i !== index)
+                            );
+                          }}
+                          className="ml-1 text-muted-foreground hover:text-foreground"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>

@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       .insert({
         name: body.name,
         phone: body.phone,
+        additional: body.additional || null,
       })
       .select()
       .single();

@@ -23,6 +23,7 @@ interface Restaurant {
   name: string;
   phone: string;
   created_at: string;
+  additional?: string[] | null;
 }
 
 interface RestaurantStatsItem {

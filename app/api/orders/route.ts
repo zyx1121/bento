@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/utils/admin'
+import { NextResponse } from 'next/server'
 
 export const revalidate = 10 // Cache for 10 seconds (orders change frequently)
 
@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data: orders, error } = await supabase
     .from('bento_orders')
-    .select('*, restaurants:bento_menus(name), order_items:bento_order_items(*, menu_items:bento_menu_items(name, price))')
+    .select('*, restaurants:bento_menus(name, additional), order_items:bento_order_items(*, menu_items:bento_menu_items(name, price))')
     .order('created_at', { ascending: false })
 
   if (error) {
