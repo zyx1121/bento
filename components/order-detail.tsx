@@ -162,7 +162,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
   };
 
   if (!order) {
-    return <div className="container mx-auto px-4 py-8">訂單不存在</div>;
+    return <div />;
   }
 
   const isActive = order.status === "active";
