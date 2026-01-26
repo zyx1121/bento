@@ -80,12 +80,12 @@ Requirements:
                         "Price of the menu item as a number (e.g. 100, 200)",
                     },
                     type: {
-                      type: "string",
+                      type: ["string", "null"],
                       description:
                         "Category/type of the menu item (e.g. 水餃, 湯品, 雞肉, 豬肉, 麵類, 小菜, 飲料, etc.)",
                     },
                   },
-                  required: ["name", "price"],
+                  required: ["name", "price", "type"],
                   additionalProperties: false,
                 },
               },
